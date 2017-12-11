@@ -4,7 +4,7 @@
 #' 
 #' @param year_range The year to search between (inclusive). For example c(2005,2007) will search for images from 2005, 2006 and 2007
 #' @param text  Set keywords so that query returns pictures with the text (e.g. "bird")
-#' @param woe_id A 32-bit identifier that uniquely represents spatial entities (e.g. 12578048 is Scotland).
+#' @param woe_id A 32-bit identifier that uniquely represents spatial entities (e.g. 12578048 is Scotland). These ids can be found using the \code{findPlaces} function
 #' @param has_geo Logical, should the function only return records that have spatial data.
 #'
 #' @return A dataframe of metadata
@@ -13,6 +13,7 @@
 #' @import httr
 #' @import RCurl
 #' @name photosSearch
+#' @seealso findPlaces
 #' @examples
 #' # run a workflow, using the logistic regression model
 #' \dontrun{
@@ -27,7 +28,6 @@ function(year_range,
          woe_id,        
          has_geo = TRUE){
   
- load('auth.rdata')
  api_key <- auth$key
  perpage <- "250"
  format<-"rest"
@@ -100,7 +100,8 @@ function(year_range,
          license <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "license")       #extract license
          
          tmp_df <- data.frame(id, owner, datetaken, tags,
-                              latitude, longitude, stringsAsFactors = FALSE)
+                              latitude, longitude, license,
+                              stringsAsFactors = FALSE)
          
          tmp_df$page <- i
          pics_tmp <- rbind(pics_tmp, tmp_df)
