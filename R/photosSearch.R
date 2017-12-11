@@ -4,7 +4,8 @@
 #' 
 #' @param year_range The year to search between (inclusive). For example c(2005,2007) will search for images from 2005, 2006 and 2007
 #' @param text  Set keywords so that query returns pictures with the text (e.g. "bird")
-#' @param woe_id A 32-bit identifier that uniquely represents spatial entities (e.g. 12578048 is Scotland).
+#' @param bbox A vector of 4 values defining the Bounding Box of the area that will be searched. The 4 values represent the bottom-left corner of the box and the top-right corner, minimum_longitude, minimum_latitude, maximum_longitude, maximum_latitude. 
+#' @param woe_id A 32-bit identifier that uniquely represents spatial entities (e.g. 12578048 is Scotland). Can not be provided if bbox allready provided
 #' @param has_geo Logical, should the function only return records that have spatial data.
 #'
 #' @return A dataframe of metadata
@@ -24,9 +25,13 @@
 photosSearch <-
 function(year_range,
          text,          
-         woe_id,        
+         bbox = NULL,
+         woe_id =NULL,        
          has_geo = TRUE){
-  
+
+  if( !(is.null(bbox) | is.null(woe_id))==TRUE) {
+    stop('can not provide bbox and woe_id')
+  }
  load('auth.rdata')
  api_key <- auth$key
  perpage <- "250"
@@ -51,16 +56,29 @@ function(year_range,
      mindate <- firstDate
      maxdate <- firstDate + m 
      
+     
+     if( is.null(woe_id) == TRUE) 
      getPhotos <- paste(baseURL,
                         "&text=", text,
                         "&min_taken_date=", as.character(mindate),
                         "&max_taken_date=", as.character(maxdate),
-                        "&woe_id=", woe_id,
+                        "&bbox=", paste0(bbox[1],",",bbox[2],",",bbox[3],",",bbox[4]),
                         "&has_geo=", has_geo,
                         "&extras=", extras,
                         "&per_page=", perpage,
                         "&format=", format,
                         sep = "")
+     else
+       getPhotos <- paste(baseURL,
+                          "&text=", text,
+                          "&min_taken_date=", as.character(mindate),
+                          "&max_taken_date=", as.character(maxdate),
+                          "&woe_id=", woe_id,
+                          "&has_geo=", has_geo,
+                          "&extras=", extras,
+                          "&per_page=", perpage,
+                          "&format=", format,
+                          sep = "")
      
      getPhotos_data <- xmlRoot(xmlTreeParse(getURL(getPhotos,
                                                    ssl.verifypeer = FALSE,
@@ -80,12 +98,25 @@ function(year_range,
        # loop thru pages of photos and save the list in a DF
        for(i in c(1:total_pages)){
          
+         if( is.null(woe_id)==TRUE) 
+         
          getPhotos <- paste(baseURL
                             ,"&text=",text,"&min_taken_date=",mindate,
-                            "&max_taken_date=",maxdate,"&woe_id=",woe_id,
+                            "&max_taken_date=",maxdate,
+                            "&bbox=", paste0(bbox[1],",",bbox[2],",",bbox[3],",",bbox[4]),
                             "&has_geo=",has_geo,"&extras=",extras,
                             "&per_page=",perpage,"&format=",format,"&page="
                             ,i,sep="")
+         
+         else
+           
+           getPhotos <- paste(baseURL
+                              ,"&text=",text,"&min_taken_date=",mindate,
+                              "&max_taken_date=",maxdate,
+                              "&woe_id=",woe_id,
+                              "&has_geo=",has_geo,"&extras=",extras,
+                              "&per_page=",perpage,"&format=",format,"&page="
+                              ,i,sep="")
          
          getPhotos_data <- xmlRoot(xmlTreeParse(getURL
                                                 (getPhotos,ssl.verifypeer=FALSE, useragent = "flickr")
@@ -118,3 +149,5 @@ function(year_range,
  return(pics)
  
 }
+
+
