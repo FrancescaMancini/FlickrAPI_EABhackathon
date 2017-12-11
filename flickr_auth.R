@@ -1,3 +1,12 @@
+#' Authentification function for Flickr API 
+#'
+#' This function allows user identification  
+#' Opens the browser and you can enter Flickr account details 
+#' 
+#' 
+#' }
+
+
 auth.flickr <- function()
 {
   
