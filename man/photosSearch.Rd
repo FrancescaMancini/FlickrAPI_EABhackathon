@@ -4,14 +4,16 @@
 \alias{photosSearch}
 \title{Query Flickr API and build a dataframe of metadata}
 \usage{
-photosSearch(year_range, text, woe_id, has_geo = TRUE)
+photosSearch(year_range, text, bbox = NULL, woe_id = NULL, has_geo = TRUE)
 }
 \arguments{
 \item{year_range}{The year to search between (inclusive). For example c(2005,2007) will search for images from 2005, 2006 and 2007}
 
 \item{text}{Set keywords so that query returns pictures with the text (e.g. "bird")}
 
-\item{woe_id}{A 32-bit identifier that uniquely represents spatial entities (e.g. 12578048 is Scotland). These ids can be found using the \code{findPlaces} function}
+\item{bbox}{A vector of 4 values defining the Bounding Box of the area that will be searched. The 4 values represent the bottom-left corner of the box and the top-right corner, minimum_longitude, minimum_latitude, maximum_longitude, maximum_latitude.}
+
+\item{woe_id}{A 32-bit identifier that uniquely represents spatial entities (e.g. 12578048 is Scotland). These ids can be found using the \code{findPlaces} function Can not be provided if bbox allready provided}
 
 \item{has_geo}{Logical, should the function only return records that have spatial data.}
 }
