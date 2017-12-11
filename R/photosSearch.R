@@ -4,11 +4,14 @@
 #' 
 #' @param year_range The year to search between (inclusive). For example c(2005,2007) will search for images from 2005, 2006 and 2007
 #' @param text  Set keywords so that query returns pictures with the text (e.g. "bird")
-#' @param woe_id A 32-bit identifier that uniquely represents spatial entities (e.g. 12578048 is England).
+#' @param woe_id A 32-bit identifier that uniquely represents spatial entities (e.g. 12578048 is Scotland).
 #' @param has_geo Logical, should the function only return records that have spatial data.
 #'
 #' @return A dataframe of metadata
 #' @export
+#' @import XML
+#' @import httr
+#' @import RCurl
 #' @name photosSearch
 #' @examples
 #' # run a workflow, using the logistic regression model
@@ -18,10 +21,11 @@
 #'
 #' }
 
-photosSearch <- function(year_range,
-                         text,          
-                         woe_id,        
-                         has_geo = TRUE){
+photosSearch <-
+function(year_range,
+         text,          
+         woe_id,        
+         has_geo = TRUE){
   
  load('auth.rdata')
  api_key <- auth$key
@@ -34,7 +38,7 @@ photosSearch <- function(year_range,
  
  #API only returns 400 results per query so it is neccessary to loop through months to obtain all the results
  
- for (y in year){                     #creates object dates
+ for (y in year_range){                     
    
    firstDate <- as.Date(paste0(y, "-01-01"))
    
@@ -51,8 +55,8 @@ photosSearch <- function(year_range,
                         "&text=", text,
                         "&min_taken_date=", as.character(mindate),
                         "&max_taken_date=", as.character(maxdate),
-                        "&woe_id=", woeid,
-                        "&has_geo=", hasgeo,
+                        "&woe_id=", woe_id,
+                        "&has_geo=", has_geo,
                         "&extras=", extras,
                         "&per_page=", perpage,
                         "&format=", format,
@@ -66,41 +70,45 @@ photosSearch <- function(year_range,
      #parse the total number of pages
      pages_data <- data.frame(xmlAttrs(getPhotos_data[["photos"]]))
      pages_data[] <- lapply(pages_data, FUN = function(x) as.integer(as.character(x)))
-     colnames(pages_data)<- "value"
-     total_pages <- pages_data["pages","value"]
+     total_pages <- pages_data["pages",]
+     total <- pages_data["pages",]
      
-     pics_tmp <- NULL
-     
-     # loop thru pages of photos and save the list in a DF
-     for(i in c(1:total_pages)){
+     if(total > 0){
        
-       getPhotos <- paste(baseURL
-                          ,"&text=",text,"&min_taken_date=",mindate,
-                          "&max_taken_date=",maxdate,"&woe_id=",woeid,
-                          "&has_geo=",hasgeo,"&extras=",extras,
-                          "&per_page=",perpage,"&format=",format,"&page="
-                          ,i,sep="")
+       pics_tmp <- NULL
        
-       getPhotos_data <- xmlRoot(xmlTreeParse(getURL
-                                              (getPhotos,ssl.verifypeer=FALSE, useragent = "flickr")
-                                              ,useInternalNodes = TRUE ))
+       # loop thru pages of photos and save the list in a DF
+       for(i in c(1:total_pages)){
+         
+         getPhotos <- paste(baseURL
+                            ,"&text=",text,"&min_taken_date=",mindate,
+                            "&max_taken_date=",maxdate,"&woe_id=",woe_id,
+                            "&has_geo=",has_geo,"&extras=",extras,
+                            "&per_page=",perpage,"&format=",format,"&page="
+                            ,i,sep="")
+         
+         getPhotos_data <- xmlRoot(xmlTreeParse(getURL
+                                                (getPhotos,ssl.verifypeer=FALSE, useragent = "flickr")
+                                                ,useInternalNodes = TRUE ))
+         
+         id <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "id")                 #extract photo id
+         owner <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "owner")           #extract user id
+         datetaken <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "datetaken")   #extract date picture was taken
+         tags <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "tags")            #extract tags
+         latitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "latitude")    #extract latitude
+         longitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "longitude")  #extract longitude
+         
+         tmp_df <- data.frame(id, owner, datetaken, tags,
+                              latitude, longitude, stringsAsFactors = FALSE)
+         
+         tmp_df$page <- i
+         pics_tmp <- rbind(pics_tmp, tmp_df)
+         
+       }
        
-       id <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "id")                 #extract photo id
-       owner <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "owner")           #extract user id
-       datetaken <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "datetaken")   #extract date picture was taken
-       tags <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "tags")            #extract tags
-       latitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "latitude")    #extract latitude
-       longitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "longitude")  #extract longitude
-       
-       tmp_df <- data.frame(id, owner, datetaken, tags,
-                            latitude, longitude, stringsAsFactors = FALSE)
-       
-       tmp_df$page <- i
-       pics_tmp <- rbind(pics_tmp, tmp_df)
+       pics <- rbind(pics, pics_tmp)
        
      }
-     
-     pics<-rbind(pics,pics_tmp)
      
    }
    
