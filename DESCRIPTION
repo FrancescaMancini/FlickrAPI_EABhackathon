@@ -1,10 +1,12 @@
 Package: flickr
 Type: Package
-Title: What the package does (short line)
+Title: Get image information from  Flickr
 Version: 1.0
 Date: 2017-12-11
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Authors@R: c(person("Francesca", "Mancini", role = c("aut"), ),
+             person("Louis", "Sutter", role = c("aut")),
+             person("Tom", "August", role = c("aut", "cre"), email = "tomaug@gmail.com"))
+Maintainer: Tom August <tomaug@ceh.ac.uk>
+Description: Get image information from  Flickr
+License: GPL
 RoxygenNote: 6.0.1
