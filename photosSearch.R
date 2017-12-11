@@ -58,22 +58,22 @@ photosSearch <- function(year_range,
                         "&format=", format,
                         sep = "")
      
-     getPhotos_data <- xmlRoot(xmlTreeParse(getURL                                    #parse URL and extract root node
-                                            (getPhotos,ssl.verifypeer=FALSE, useragent = "flickr") ))
+     getPhotos_data <- xmlRoot(xmlTreeParse(getURL(getPhotos,
+                                                   ssl.verifypeer = FALSE,
+                                                   useragent = "flickr")))
      
      #results are returned in different pages so it is necessary to loop through pages to collect all the data
      #parse the total number of pages
      pages_data <- data.frame(xmlAttrs(getPhotos_data[["photos"]]))
-     pages_data[] <- lapply(pages_data, as.character)
-     pages_data[] <- lapply(pages_data, as.integer)
+     pages_data[] <- lapply(pages_data, FUN = function(x) as.integer(as.character))
      colnames(pages_data)<- "value"
      total_pages <- pages_data["pages","value"]
      
-     pics_tmp<-NULL
-     
+     pics_tmp <- NULL
      
      # loop thru pages of photos and save the list in a DF
      for(i in c(1:total_pages)){
+       
        getPhotos <- paste(baseURL
                           ,"&text=",text,"&min_taken_date=",mindate,
                           "&max_taken_date=",maxdate,"&woe_id=",woeid,
@@ -85,17 +85,19 @@ photosSearch <- function(year_range,
                                               (getPhotos,ssl.verifypeer=FALSE, useragent = "flickr")
                                               ,useInternalNodes = TRUE ))
        
-       id<-xpathSApply(getPhotos_data,"//photo",xmlGetAttr,"id")                 #extract photo id
-       owner<-xpathSApply(getPhotos_data,"//photo",xmlGetAttr,"owner")           #extract user id
-       datetaken<-xpathSApply(getPhotos_data,"//photo",xmlGetAttr,"datetaken")   #extract date picture was taken
-       tags<- xpathSApply(getPhotos_data,"//photo",xmlGetAttr,"tags")            #extract tags
-       latitude<- xpathSApply(getPhotos_data,"//photo",xmlGetAttr,"latitude")    #extract latitude
-       longitude<- xpathSApply(getPhotos_data,"//photo",xmlGetAttr,"longitude")  #extract longitude
+       id <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "id")                 #extract photo id
+       owner <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "owner")           #extract user id
+       datetaken <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "datetaken")   #extract date picture was taken
+       tags <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "tags")            #extract tags
+       latitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "latitude")    #extract latitude
+       longitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "longitude")  #extract longitude
        
-       tmp_df<-data.frame(cbind(id,owner,datetaken,tags,latitude,longitude),stringsAsFactors=FALSE)
+       tmp_df <- data.frame(id, owner, datetaken, tags,
+                            latitude, longitude, stringsAsFactors = FALSE)
        
        tmp_df$page <- i
-       pics_tmp<-rbind(pics_tmp,tmp_df)
+       pics_tmp <- rbind(pics_tmp, tmp_df)
+       
      }
      
      
