@@ -10,15 +10,15 @@ library(devtools)
 install_github('FrancescaMancini/FlickrAPI_EABhackathon')
 
 # get some glorious metadata
-snowmen <- photosSearch(year_range = c(2005, 2017),
+snowmen <- photosSearch(year_range = c(2005, 2007),
                         text = 'snowman',
                         woe_id = 12578048)
                         
 head(snowmen)
 str(snowmen)
-
-
 ```
+
+![Alt text](images/snowmen.png?raw=true "Title")
 
 R code to download data associated with photos uploaded on Flickr. 
 This code uses flickr.photos.search API tool to download the metadata associated with photos uploaded on Flickr. It includes loops through months and years to avoid API limitations in the number of results returned; loops through pages of results. It uses geographic restrictions and keywords to select which photos to download. It returns a dataframe
