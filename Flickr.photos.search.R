@@ -5,22 +5,28 @@
 # last modified 04/11/2016
 #####################################################
 
+rm(list = ls())
+
 library(RCurl)
 library(XML)
 library(httr)
 
-api_key<-"your_api_key_here"      #API key and secret must be obtained from https://www.flickr.com/services/api/misc.api_keys.html
+load('auth.rdata')
 
-secret<- "your_secret_here"
+api_key <- auth$key      #API key and secret must be obtained from https://www.flickr.com/services/api/misc.api_keys.html
 
-myapp<-oauth_app("your_app_name_here",key= api_key,secret= secret)                  #creates the app passing the key and secret
+secret <- auth$secret
+
+myapp <- oauth_app("Flickr R-package",
+                   key = api_key,
+                   secret = secret)                  #creates the app passing the key and secret
 
 
 
 
-ep<-oauth_endpoint(request="https://www.flickr.com/services/oauth/request_token"    #get authentication credentials from the API
-                    ,authorize="https://www.flickr.com/services/oauth/authorize",
-                    access="https://www.flickr.com/services/oauth/access_token")
+ep <- oauth_endpoint(request="https://www.flickr.com/services/oauth/request_token",    #get authentication credentials from the API
+                     authorize="https://www.flickr.com/services/oauth/authorize",
+                     access="https://www.flickr.com/services/oauth/access_token")
 
 
 sig<-oauth1.0_token(ep,myapp,cache=F)                                             #creates variable with authentication credentials
