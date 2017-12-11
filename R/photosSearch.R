@@ -31,7 +31,7 @@ function(year_range,
  api_key <- auth$key
  perpage <- "250"
  format<-"rest"
- extras <- "date_taken,geo,tags"
+ extras <- "date_taken,geo,tags,license"
  baseURL <- paste("https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=",api_key,sep="")   #set base URL
  pics<-NULL
  year_range <- seq(min(year_range), max(year_range), 1)
@@ -94,9 +94,10 @@ function(year_range,
          id <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "id")                 #extract photo id
          owner <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "owner")           #extract user id
          datetaken <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "datetaken")   #extract date picture was taken
-         tags <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "tags")            #extract tags
-         latitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "latitude")    #extract latitude
-         longitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "longitude")  #extract longitude
+         tags <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "tags")             #extract tags
+         latitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "latitude")     #extract latitude
+         longitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "longitude")   #extract longitude
+         license <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "license")       #extract license
          
          tmp_df <- data.frame(id, owner, datetaken, tags,
                               latitude, longitude, stringsAsFactors = FALSE)
