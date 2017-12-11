@@ -103,7 +103,8 @@ function(year_range,
          # url_o <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_o")           #extract url_o
          
          tmp_df <- data.frame(id, owner, datetaken, tags,
-                              latitude, longitude, license,
+                              as.numeric(latitude),
+                              as.numeric(longitude), license,
                               stringsAsFactors = FALSE)
          
          tmp_df$page <- i

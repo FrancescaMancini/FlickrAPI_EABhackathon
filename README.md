@@ -10,12 +10,14 @@ library(devtools)
 install_github('FrancescaMancini/FlickrAPI_EABhackathon')
 
 # get some glorious metadata
-snowmen <- photosSearch(year_range = c(2005, 2007),
+snowmen <- photosSearch(year_range = c(2005, 2017),
                         text = 'snowman',
                         woe_id = 12578048)
                         
 head(snowmen)
 str(snowmen)
+
+
 ```
 
 R code to download data associated with photos uploaded on Flickr. 
