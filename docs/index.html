@@ -53,6 +53,7 @@
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#flickr" class="anchor"></a>Flickr</h1></div>
 <p>The flickr package allows you to access image metadata from flickr through R</p>
+<p>Check out the website for more information <a href="https://augustt.github.io/FlickrAPI_EABhackathon/" class="uri">https://augustt.github.io/FlickrAPI_EABhackathon/</a></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># install the package from github</span>
 <span class="kw">library</span>(devtools)
 <span class="kw">install_github</span>(<span class="st">'FrancescaMancini/FlickrAPI_EABhackathon'</span>)
@@ -64,6 +65,7 @@ snowmen &lt;-<span class="st"> </span><span class="kw"><a href="reference/photos
                         
 <span class="kw">head</span>(snowmen)
 <span class="kw">str</span>(snowmen)</code></pre></div>
+<p><img src="https://raw.githubusercontent.com/AugustT/FlickrAPI_EABhackathon/master/images/snowmen.png?raw=true" title="Title" alt="Snowman Map"></p>
 <p>R code to download data associated with photos uploaded on Flickr. This code uses flickr.photos.search API tool to download the metadata associated with photos uploaded on Flickr. It includes loops through months and years to avoid API limitations in the number of results returned; loops through pages of results. It uses geographic restrictions and keywords to select which photos to download. It returns a dataframe</p>
 </div>
   </div>
