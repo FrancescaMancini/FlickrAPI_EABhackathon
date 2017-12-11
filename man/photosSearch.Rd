@@ -11,7 +11,7 @@ photosSearch(year_range, text, woe_id, has_geo = TRUE)
 
 \item{text}{Set keywords so that query returns pictures with the text (e.g. "bird")}
 
-\item{woe_id}{A 32-bit identifier that uniquely represents spatial entities (e.g. 12578048 is Scotland).}
+\item{woe_id}{A 32-bit identifier that uniquely represents spatial entities (e.g. 12578048 is Scotland). These ids can be found using the \code{findPlaces} function}
 
 \item{has_geo}{Logical, should the function only return records that have spatial data.}
 }
@@ -25,7 +25,12 @@ This function uses the Flickr API to get metadata about the images
 # run a workflow, using the logistic regression model
 \dontrun{
 
-photosSearch(c(2005,2006), "bird", "12578048", TRUE)
+birds <- photosSearch(c(2005,2006), "bird", "12578048", TRUE)
+
+head(birds)
 
 }
+}
+\seealso{
+findPlaces
 }
