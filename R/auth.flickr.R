@@ -2,12 +2,13 @@
 #'
 #' This function allows user identification  
 #' Opens the browser and you can enter Flickr account details 
-#' 
-#' 
-#' }
+#' @export
+#' @import httr
+#' @name authFlickr
 
 
-auth.flickr <- function()
+authFlickr <-
+function()
 {
   
   load('auth.rdata')
