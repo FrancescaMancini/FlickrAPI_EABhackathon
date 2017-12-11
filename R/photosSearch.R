@@ -50,8 +50,8 @@ function(year_range,
    
    for(m in 1:(length(month) - 1)){
      
-     mindate <- firstDate + month[i]
-     maxdate <- firstDate + month[i + 1]
+     mindate <- firstDate + month[m]
+     maxdate <- firstDate + month[m + 1]
      
      getPhotos <- paste(baseURL,
                         "&text=", text,
