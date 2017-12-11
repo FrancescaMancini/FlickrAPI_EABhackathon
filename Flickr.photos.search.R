@@ -9,29 +9,28 @@ library(RCurl)
 library(XML)
 library(httr)
 
-api_key<-"your_api_key_here"      #API key and secret must be obtained from https://www.flickr.com/services/api/misc.api_keys.html
+load("~/Documents/1-Auswertungen/FlickrAPI_EABhackathon/auth.rdata")
 
-secret<- "your_secret_here"
-
-myapp<-oauth_app("your_app_name_here",key= api_key,secret= secret)                  #creates the app passing the key and secret
-
-
-
+oath.flickr <- function(key,secret)
+  {
+myapp<-oauth_app("Flickr R-package",key= key,secret= secret)                  #creates the app passing the key and secret
 
 ep<-oauth_endpoint(request="https://www.flickr.com/services/oauth/request_token"    #get authentication credentials from the API
                     ,authorize="https://www.flickr.com/services/oauth/authorize",
                     access="https://www.flickr.com/services/oauth/access_token")
 
-
 sig<-oauth1.0_token(ep,myapp,cache=F)                                             #creates variable with authentication credentials
 
 fl_sig <- sign_oauth1.0(myapp,sig)                                                #authenticate
+}
 
-baseURL <- paste("https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=",api_key,sep="")   #set base URL
+oath.flickr(auth$key,auth$secret)
+
+baseURL <- paste("https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=",auth$key,sep="")   #set base URL
 
 
 pics<-NULL                              #creates empty object to store the data
-year<-seq(2005,2014,1)                  #creates variable "year" so that query returns pictures taken between 2005 and 2014
+year<-seq(2005,2006,1)                  #creates variable "year" so that query returns pictures taken between 2005 and 2014
 text<-"bird"                            #set keywords so that query returns pictures with the text "bird"
 woeid<-"12578048"                       #only return pictures taken in Scotland
 hasgeo<-"1"                             #only return pictures that are geotagged
@@ -39,7 +38,7 @@ extras<-"date_taken,geo,tags"           #extra information to download
 perpage<-"250"                          #number of results to return per page
 format<-"rest"                          #format of results
 
-#API only returns 400 results per query so it is neccessary to loop through months to obtain all the results
+#API only returns 4000 results per query so it is neccessary to loop through months to obtain all the results
 
  for (y in 1:length(year)){                     #creates object dates
       for (m in 1:12){ daymin<-"01"
@@ -112,3 +111,28 @@ format<-"rest"                          #format of results
 
                   pics<-rbind(pics,pics_tmp)
 }}
+
+baseURL
+flickr.places.getInfo
+flickr.places.find
+
+newURSltester<-"https://api.flickr.com/services/rest/?method=flickr.places.find&api_key=e921f86f20cf6766440da8a7394890ee"
+query<- "Alabama"
+
+getPhotos <- paste0(newURSltester
+                   ,"&query=",query)
+
+getPhotos_data <- xmlRoot(xmlTreeParse(getURL
+                                       (getPhotos,ssl.verifypeer=FALSE, useragent = "flickr")
+                                       ,useInternalNodes = TRUE ))
+
+id<-xpathSApply(getPhotos_data,"//photo",xmlGetAttr,"id")                 #extract photo id
+owner<-xpathSApply(getPhotos_data,"//photo",xmlGetAttr,"owner")           #extract user id
+datetaken<-xpathSApply(getPhotos_data,"//photo",xmlGetAttr,"datetaken")   #extract date picture was taken
+tags<- xpathSApply(getPhotos_data,"//photo",xmlGetAttr,"tags")            #extract tags
+latitude<- xpathSApply(getPhotos_data,"//photo",xmlGetAttr,"latitude")    #extract latitude
+longitude<- xpathSApply(getPhotos_data,"//photo",xmlGetAttr,"longitude")  #extract longitude
+
+tmp_df<-data.frame(cbind(id,owner,datetaken,tags,latitude,longitude),stringsAsFactors=FALSE)
+
+xpathSApply(getPhotos_data)
