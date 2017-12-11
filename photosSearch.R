@@ -34,7 +34,7 @@ photosSearch <- function(year_range,
  
  #API only returns 400 results per query so it is neccessary to loop through months to obtain all the results
  
- for (y in 1:length(year)){                     #creates object dates
+ for (y in year){                     #creates object dates
    
    firstDate <- as.Date(paste0(y, "-01-01"))
    
@@ -49,8 +49,8 @@ photosSearch <- function(year_range,
      
      getPhotos <- paste(baseURL,
                         "&text=", text,
-                        "&min_taken_date=", mindate,
-                        "&max_taken_date=", maxdate,
+                        "&min_taken_date=", as.character(mindate),
+                        "&max_taken_date=", as.character(maxdate),
                         "&woe_id=", woeid,
                         "&has_geo=", hasgeo,
                         "&extras=", extras,
@@ -65,7 +65,7 @@ photosSearch <- function(year_range,
      #results are returned in different pages so it is necessary to loop through pages to collect all the data
      #parse the total number of pages
      pages_data <- data.frame(xmlAttrs(getPhotos_data[["photos"]]))
-     pages_data[] <- lapply(pages_data, FUN = function(x) as.integer(as.character))
+     pages_data[] <- lapply(pages_data, FUN = function(x) as.integer(as.character(x)))
      colnames(pages_data)<- "value"
      total_pages <- pages_data["pages","value"]
      
@@ -100,11 +100,12 @@ photosSearch <- function(year_range,
        
      }
      
-     
      pics<-rbind(pics,pics_tmp)
+     
    }
+   
  }
+ 
  return(pics)
  
 }
-     
