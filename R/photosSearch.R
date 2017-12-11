@@ -18,8 +18,10 @@
 #' # run a workflow, using the logistic regression model
 #' \dontrun{
 #'
-#' photosSearch(c(2005,2006), "bird", "12578048", TRUE)
+#' birds <- photosSearch(c(2005,2006), "bird", "12578048", TRUE)
 #'
+#' head(birds)
+#' 
 #' }
 
 photosSearch <-
@@ -31,7 +33,7 @@ function(year_range,
  api_key <- auth$key
  perpage <- "250"
  format<-"rest"
- extras <- "date_taken,geo,tags,license"
+ extras <- "date_taken,geo,tags,license,url_o"
  baseURL <- paste("https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=",api_key,sep="")   #set base URL
  pics<-NULL
  year_range <- seq(min(year_range), max(year_range), 1)
@@ -44,12 +46,12 @@ function(year_range,
    
    nDays <- length(seq(as.Date(firstDate), as.Date(paste0(y, "-12-31")), by="+1 day"))
    
-   month <- round(seq(from = 1, to = nDays, length.out = 12))
+   month <- round(seq(from = 0, to = nDays, length.out = 12))
    
-   for(m in tail(month, -1)){
+   for(m in 1:(length(month) - 1)){
      
-     mindate <- firstDate
-     maxdate <- firstDate + m 
+     mindate <- firstDate + month[i]
+     maxdate <- firstDate + month[i + 1]
      
      getPhotos <- paste(baseURL,
                         "&text=", text,
@@ -98,6 +100,7 @@ function(year_range,
          latitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "latitude")     #extract latitude
          longitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "longitude")   #extract longitude
          license <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "license")       #extract license
+         # url_o <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_o")           #extract url_o
          
          tmp_df <- data.frame(id, owner, datetaken, tags,
                               latitude, longitude, license,

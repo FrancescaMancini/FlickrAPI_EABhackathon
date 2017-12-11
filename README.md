@@ -2,6 +2,8 @@
 
 The flickr package allows you to access image metadata from flickr through R
 
+Check out the website for more information [https://augustt.github.io/FlickrAPI_EABhackathon/](https://augustt.github.io/FlickrAPI_EABhackathon/)
+
 ```r
 # install the package from github
 library(devtools)
