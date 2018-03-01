@@ -13,7 +13,7 @@ function()
   
   # creates the app passing the key and secret
   myapp <- oauth_app("Flickr R-package", key = auth$key, secret = auth$secret) 
-  
+
   # get authentication credentials from the API
   ep <- oauth_endpoint(request = "https://www.flickr.com/services/oauth/request_token", 
                        authorize = "https://www.flickr.com/services/oauth/authorize?perms=read",
