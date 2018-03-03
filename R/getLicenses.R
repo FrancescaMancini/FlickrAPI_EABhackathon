@@ -7,7 +7,7 @@
 #' # run a workflow, using the logistic regression model
 #' \dontrun{
 #'
-#' getLicnses()
+#' getLicenses()
 #' 
 #' }
 
