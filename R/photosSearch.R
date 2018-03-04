@@ -38,8 +38,8 @@ function(year_range,
  load('auth.rdata')
  api_key <- auth$key
  perpage <- "250"
- format<-"rest"
- extras <- "date_taken,geo,tags,license,url_o"
+ format <- "rest"
+ extras <- "date_taken,geo,tags,license,url_sq,url_t,url_s,url_q,url_m,url_n,url_z,url_c,url_l,url_o"
  baseURL <- paste("https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=",api_key,sep="")   #set base URL
  pics<-NULL
  year_range <- seq(min(year_range), max(year_range), 1)
@@ -132,11 +132,21 @@ function(year_range,
          latitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "latitude")     #extract latitude
          longitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "longitude")   #extract longitude
          license <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "license")       #extract license
-         # url_o <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_o")           #extract url_o
+         url_s <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_s")           #extract url_s
+         url_m <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_m")           #extract url_m
+         url_l <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_l")           #extract url_l
+         url_o <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_o")           #extract url_o
+         
+         url_s[sapply(url_s, is.null)] <- NA
+         url_m[sapply(url_m, is.null)] <- NA
+         url_l[sapply(url_l, is.null)] <- NA
+         url_o[sapply(url_o, is.null)] <- NA
          
          tmp_df <- data.frame(id, owner, datetaken, tags,
                               as.numeric(latitude),
                               as.numeric(longitude), license,
+                              url_s = unlist(url_s), url_m = unlist(url_m),
+                              url_l = unlist(url_l), url_o = unlist(url_o),
                               stringsAsFactors = FALSE)
          
          tmp_df$page <- i
