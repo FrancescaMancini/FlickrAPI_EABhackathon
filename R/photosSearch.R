@@ -19,7 +19,7 @@
 #' # run a workflow, using the logistic regression model
 #' \dontrun{
 #' 
-#' # Authenticate teh first time you run a search
+#' # Authenticate the first time you run a search
 #' #auth.flickr()
 #'
 #' birds <- photosSearch(year_range = c(2005,2006),
@@ -53,13 +53,15 @@ function(year_range,
  
  #API only returns 400 results per query so it is neccessary to loop through months to obtain all the results
  
+ pb <- txtProgressBar(min = 0, max = length(year_range)*12, style = 3)
+
  for (y in year_range){                     
    
    firstDate <- as.Date(paste0(y, "-01-01"))
    
    nDays <- length(seq(as.Date(firstDate), as.Date(paste0(y, "-12-31")), by="+1 day"))
    
-   month <- round(seq(from = 0, to = nDays, length.out = 12))
+   month <- round(seq(from = 0, to = nDays, length.out = 13))
    
    for(m in 1:(length(month) - 1)){
      
@@ -67,7 +69,7 @@ function(year_range,
      maxdate <- firstDate + month[m + 1]
      
      
-     if( is.null(woe_id) == TRUE) 
+     if(!is.null(bbox)){
      getPhotos <- paste(baseURL,
                         "&text=", text,
                         "&min_taken_date=", as.character(mindate),
@@ -78,7 +80,7 @@ function(year_range,
                         "&per_page=", perpage,
                         "&format=", format,
                         sep = "")
-     else
+     } else if(!is.null(woe_id)){
        getPhotos <- paste(baseURL,
                           "&text=", text,
                           "&min_taken_date=", as.character(mindate),
@@ -88,7 +90,19 @@ function(year_range,
                           "&extras=", extras,
                           "&per_page=", perpage,
                           "&format=", format,
+                          sep = "")     
+     } else {
+       getPhotos <- paste(baseURL,
+                          "&text=", text,
+                          "&min_taken_date=", as.character(mindate),
+                          "&max_taken_date=", as.character(maxdate),
+                          "&has_geo=", has_geo,
+                          "&extras=", extras,
+                          "&per_page=", perpage,
+                          "&format=", format,
                           sep = "")
+      }
+
      
      getPhotos_data <- xmlRoot(xmlTreeParse(getURL(getPhotos,
                                                    ssl.verifypeer = FALSE,
@@ -108,9 +122,9 @@ function(year_range,
        # loop thru pages of photos and save the list in a DF
        for(i in c(1:total_pages)){
          
-         if( is.null(woe_id)==TRUE) 
+         if(!is.null(bbox)){ 
          
-         getPhotos <- paste(baseURL
+          getPhotos <- paste(baseURL
                             ,"&text=",text,"&min_taken_date=",mindate,
                             "&max_taken_date=",maxdate,
                             "&bbox=", paste0(bbox[1],",",bbox[2],",",bbox[3],",",bbox[4]),
@@ -118,7 +132,7 @@ function(year_range,
                             "&per_page=",perpage,"&format=",format,"&page="
                             ,i,sep="")
          
-         else
+         } else if(!is.null(woe_id)){
            
            getPhotos <- paste(baseURL
                               ,"&text=",text,"&min_taken_date=",mindate,
@@ -127,6 +141,17 @@ function(year_range,
                               "&has_geo=",has_geo,"&extras=",extras,
                               "&per_page=",perpage,"&format=",format,"&page="
                               ,i,sep="")
+           
+         } else {
+           
+           getPhotos <- paste(baseURL
+                              ,"&text=",text,"&min_taken_date=",mindate,
+                              "&max_taken_date=",maxdate,
+                              "&has_geo=",has_geo,"&extras=",extras,
+                              "&per_page=",perpage,"&format=",format,"&page="
+                              ,i,sep="")        
+           
+         }
          
          getPhotos_data <- xmlRoot(xmlTreeParse(getURL
                                                 (getPhotos,ssl.verifypeer=FALSE, useragent = "flickr")
@@ -165,10 +190,17 @@ function(year_range,
        
      }
      
+     for(i in 1:total){
+       Sys.sleep(0.1)
+       # update progress bar
+       setTxtProgressBar(pb, ((y - min(year_range)) * 12) + m)
+     }
+     
    }
    
  }
  
+ close(pb)
  return(pics)
  
 }
