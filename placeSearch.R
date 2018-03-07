@@ -1,5 +1,4 @@
 
-load('auth.rdata')
 api_key <- auth$key
 format<-"rest"
 query <- "Scotland"

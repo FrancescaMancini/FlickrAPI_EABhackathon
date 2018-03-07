@@ -18,8 +18,14 @@
 #' @examples
 #' # run a workflow, using the logistic regression model
 #' \dontrun{
+#' 
+#' # Authenticate teh first time you run a search
+#' #auth.flickr()
 #'
-#' birds <- photosSearch(c(2005,2006), "bird", "12578048", TRUE)
+#' birds <- photosSearch(year_range = c(2005,2006),
+#'                       text = "mute+swan",
+#'                       woe_id =  12578048,
+#'                       has_geo = TRUE)
 #'
 #' head(birds)
 #' 
@@ -35,7 +41,8 @@ function(year_range,
   if( !(is.null(bbox) | is.null(woe_id))==TRUE) {
     stop('can not provide bbox and woe_id')
   }
- load('auth.rdata')
+
+ text <- gsub(' ', '+', trimws(text))  
  api_key <- auth$key
  perpage <- "250"
  format <- "rest"
