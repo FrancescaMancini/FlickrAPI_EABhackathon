@@ -114,7 +114,7 @@ function(year_range,
      }
 
      if(r$status_code != 200){
-       stop('Status code:', r$status, 'message: ', content(r, 'text'))
+       warning('Status code:', r$status, ' for year', y, 'month', m, '- message: ', content(r, 'text'))
      }
           
      getPhotos_data <- xmlRoot(xmlTreeParse(content(r, 'text')))
