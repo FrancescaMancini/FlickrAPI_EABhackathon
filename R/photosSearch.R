@@ -190,11 +190,7 @@ function(year_range,
        
      }
      
-     for(i in 1:total){
-       Sys.sleep(0.1)
-       # update progress bar
-       setTxtProgressBar(pb, ((y - min(year_range)) * 12) + m)
-     }
+     setTxtProgressBar(pb, ((y - min(year_range)) * 12) + m)
      
    }
    
