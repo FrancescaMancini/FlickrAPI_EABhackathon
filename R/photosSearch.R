@@ -105,16 +105,16 @@ function(year_range,
 
      r <- GET(getPhotos)
      
-     count <- 0
+     count_stat <- 0
      
      while(r$status_code != 200 & count_stat < 3){
        Sys.sleep(0.1)
        r <- GET(getPhotos)
-       count <-  count + 1
+       count_stat <-  count_stat + 1
      }
 
      if(r$status_code != 200){
-       warning('Status code:', r$status, ' for year', y, 'month', m, '- message: ', content(r, 'text'))
+       warning('Status code:', r$status, ' for year ', y, ' month ', m, ' - message: ', content(r, 'text'))
      }
           
      getPhotos_data <- xmlRoot(xmlTreeParse(content(r, 'text')))
