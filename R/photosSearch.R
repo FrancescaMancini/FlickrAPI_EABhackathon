@@ -103,10 +103,21 @@ function(year_range,
                           sep = "")
       }
 
+     r <- GET(getPhotos)
      
-     getPhotos_data <- xmlRoot(xmlTreeParse(getURL(getPhotos,
-                                                   ssl.verifypeer = FALSE,
-                                                   useragent = "flickr")))
+     count <- 0
+     
+     while(r$status_code != 200 & count_stat < 3){
+       Sys.sleep(0.1)
+       r <- GET(getPhotos)
+       count <-  count + 1
+     }
+
+     if(r$status_code != 200){
+       warning('Status code:', r$status, ' for year', y, 'month', m, '- message: ', content(r, 'text'))
+     }
+          
+     getPhotos_data <- xmlRoot(xmlTreeParse(content(r, 'text')))
      
      #results are returned in different pages so it is necessary to loop through pages to collect all the data
      #parse the total number of pages
