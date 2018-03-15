@@ -75,7 +75,6 @@ function(year_range,
                         "&min_taken_date=", as.character(mindate),
                         "&max_taken_date=", as.character(maxdate),
                         "&bbox=", paste0(bbox[1],",",bbox[2],",",bbox[3],",",bbox[4]),
-                        "&has_geo=", has_geo,
                         "&extras=", extras,
                         "&per_page=", perpage,
                         "&format=", format,
@@ -86,7 +85,6 @@ function(year_range,
                           "&min_taken_date=", as.character(mindate),
                           "&max_taken_date=", as.character(maxdate),
                           "&woe_id=", woe_id,
-                          "&has_geo=", has_geo,
                           "&extras=", extras,
                           "&per_page=", perpage,
                           "&format=", format,
@@ -96,7 +94,7 @@ function(year_range,
                           "&text=", text,
                           "&min_taken_date=", as.character(mindate),
                           "&max_taken_date=", as.character(maxdate),
-                          "&has_geo=", has_geo,
+                          ifelse(has_geo, paste0("&has_geo=", has_geo), ''),
                           "&extras=", extras,
                           "&per_page=", perpage,
                           "&format=", format,
@@ -108,7 +106,7 @@ function(year_range,
      count_stat <- 0
      
      while(r$status_code != 200 & count_stat < 3){
-       Sys.sleep(0.1)
+       Sys.sleep(0.5)
        r <- GET(getPhotos)
        count_stat <-  count_stat + 1
      }
@@ -116,94 +114,126 @@ function(year_range,
      if(r$status_code != 200){
        warning('Status code:', r$status, ' for year ', y, ' month ', m, ' - message: ', content(r, 'text'))
      }
-          
-     getPhotos_data <- xmlRoot(xmlTreeParse(content(r, 'text')))
+    
+     error <- tryCatch({
+       getPhotos_data <- xmlRoot(xmlTreeParse(content(r, 'text')))
+       error <- 'sucess'
+       }, error = function(err){
+         warning('Year ', y, ' month ', m, ' skipped beacuse: ', err)
+         error <- 'error'
+       })    
      
-     #results are returned in different pages so it is necessary to loop through pages to collect all the data
-     #parse the total number of pages
-     pages_data <- data.frame(xmlAttrs(getPhotos_data[["photos"]]))
-     pages_data[] <- lapply(pages_data, FUN = function(x) as.integer(as.character(x)))
-     total_pages <- pages_data["pages",]
-     total <- pages_data["pages",]
-     
-     if(total > 0){
+     if(error != 'error'){
+         
+       #results are returned in different pages so it is necessary to loop through pages to collect all the data
+       #parse the total number of pages
+       pages_data <- data.frame(xmlAttrs(getPhotos_data[["photos"]]))
+       pages_data[] <- lapply(pages_data, FUN = function(x) as.integer(as.character(x)))
+       total_pages <- pages_data["pages",]
+       total <- pages_data["pages",]
        
-       pics_tmp <- NULL
-       
-       # loop thru pages of photos and save the list in a DF
-       for(i in c(1:total_pages)){
+       if(total > 0){
          
-         if(!is.null(bbox)){ 
+         pics_tmp <- NULL
          
-          getPhotos <- paste(baseURL
-                            ,"&text=",text,"&min_taken_date=",mindate,
-                            "&max_taken_date=",maxdate,
-                            "&bbox=", paste0(bbox[1],",",bbox[2],",",bbox[3],",",bbox[4]),
-                            "&has_geo=",has_geo,"&extras=",extras,
-                            "&per_page=",perpage,"&format=",format,"&page="
-                            ,i,sep="")
-         
-         } else if(!is.null(woe_id)){
+         # loop thru pages of photos and save the list in a DF
+         for(i in c(1:total_pages)){
            
-           getPhotos <- paste(baseURL
+           if(!is.null(bbox)){ 
+           
+            getPhotos <- paste(baseURL
                               ,"&text=",text,"&min_taken_date=",mindate,
                               "&max_taken_date=",maxdate,
-                              "&woe_id=",woe_id,
-                              "&has_geo=",has_geo,"&extras=",extras,
+                              "&bbox=", paste0(bbox[1],",",bbox[2],",",bbox[3],",",bbox[4]),
+                              "&extras=",extras,
                               "&per_page=",perpage,"&format=",format,"&page="
                               ,i,sep="")
            
-         } else {
+           } else if(!is.null(woe_id)){
+             
+             getPhotos <- paste(baseURL
+                                ,"&text=",text,"&min_taken_date=",mindate,
+                                "&max_taken_date=",maxdate,
+                                "&woe_id=",woe_id,
+                                "&extras=",extras,
+                                "&per_page=",perpage,"&format=",format,"&page="
+                                ,i,sep="")
+             
+           } else {
+             
+             getPhotos <- paste(baseURL
+                                ,"&text=",text,"&min_taken_date=",mindate,
+                                "&max_taken_date=",maxdate,
+                                ifelse(has_geo, paste0("&has_geo=", has_geo), ''),
+                                "&extras=",extras,
+                                "&per_page=",perpage,"&format=",format,"&page="
+                                ,i,sep="")        
+             
+           }
            
-           getPhotos <- paste(baseURL
-                              ,"&text=",text,"&min_taken_date=",mindate,
-                              "&max_taken_date=",maxdate,
-                              "&has_geo=",has_geo,"&extras=",extras,
-                              "&per_page=",perpage,"&format=",format,"&page="
-                              ,i,sep="")        
+           r <- GET(getPhotos)
+           
+           count_stat <- 0
+           
+           while(r$status_code != 200 & count_stat < 3){
+             Sys.sleep(0.5)
+             r <- GET(getPhotos)
+             count_stat <-  count_stat + 1
+           }
+           
+           if(r$status_code != 200){
+             warning('Status code:', r$status, ' for year ', y, ' month ', m, ' page ', i, ' - message: ', content(r, 'text'))
+           }
+           
+           error <- tryCatch({
+             getPhotos_data <- xmlRoot(xmlTreeParse(content(r, 'text'), useInternalNodes = TRUE))
+             error <- 'sucess'
+           }, error = function(err){
+             warning('Year ', y, ' month ', m, ' page ', i,' skipped beacuse: ', err)
+             error <- 'error'
+           })
+           
+           if(error != 'error'){
+           
+             id <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "id")                 #extract photo id
+             owner <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "owner")           #extract user id
+             datetaken <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "datetaken")   #extract date picture was taken
+             tags <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "tags")             #extract tags
+             latitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "latitude")     #extract latitude
+             longitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "longitude")   #extract longitude
+             license <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "license")       #extract license
+             url_s <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_s")           #extract url_s
+             url_m <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_m")           #extract url_m
+             url_l <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_l")           #extract url_l
+             url_o <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_o")           #extract url_o
+             
+             url_s[sapply(url_s, is.null)] <- NA
+             url_m[sapply(url_m, is.null)] <- NA
+             url_l[sapply(url_l, is.null)] <- NA
+             url_o[sapply(url_o, is.null)] <- NA
+             
+             tmp_df <- data.frame(id, owner, datetaken, tags,
+                                  as.numeric(latitude),
+                                  as.numeric(longitude), license,
+                                  url_s = unlist(url_s), url_m = unlist(url_m),
+                                  url_l = unlist(url_l), url_o = unlist(url_o),
+                                  stringsAsFactors = FALSE)
+             
+             tmp_df$page <- i
+             pics_tmp <- rbind(pics_tmp, tmp_df)
+           
+           }
            
          }
          
-         getPhotos_data <- xmlRoot(xmlTreeParse(getURL
-                                                (getPhotos,ssl.verifypeer=FALSE, useragent = "flickr")
-                                                ,useInternalNodes = TRUE ))
-         
-         id <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "id")                 #extract photo id
-         owner <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "owner")           #extract user id
-         datetaken <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "datetaken")   #extract date picture was taken
-         tags <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "tags")             #extract tags
-         latitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "latitude")     #extract latitude
-         longitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "longitude")   #extract longitude
-         license <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "license")       #extract license
-         url_s <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_s")           #extract url_s
-         url_m <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_m")           #extract url_m
-         url_l <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_l")           #extract url_l
-         url_o <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_o")           #extract url_o
-         
-         url_s[sapply(url_s, is.null)] <- NA
-         url_m[sapply(url_m, is.null)] <- NA
-         url_l[sapply(url_l, is.null)] <- NA
-         url_o[sapply(url_o, is.null)] <- NA
-         
-         tmp_df <- data.frame(id, owner, datetaken, tags,
-                              as.numeric(latitude),
-                              as.numeric(longitude), license,
-                              url_s = unlist(url_s), url_m = unlist(url_m),
-                              url_l = unlist(url_l), url_o = unlist(url_o),
-                              stringsAsFactors = FALSE)
-         
-         tmp_df$page <- i
-         pics_tmp <- rbind(pics_tmp, tmp_df)
+         pics <- rbind(pics, pics_tmp)
          
        }
-       
-       pics <- rbind(pics, pics_tmp)
-       
      }
      
      setTxtProgressBar(pb, ((y - min(year_range)) * 12) + m)
      
-   }
+     }
    
  }
  
