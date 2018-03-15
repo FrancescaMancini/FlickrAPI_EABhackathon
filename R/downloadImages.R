@@ -6,18 +6,22 @@
 #' @param licenses  Numeric vector, set the licenses you want to download images for. See \code{getLicenses}
 #' @param saveDir Character, the path where images should be saved
 #' @param max_quality Numeric 1-4 giving the maximum quality of image you want to download 1=small, 4=large
+#' @param verbose logical, if TRUE the progeress through images is given
 #' 
-#' @return NULL
+#' @return A vector of all the URLs that where targetted for download
 #' @export
 #' @name downloadImages
 #' @examples
 #' # run a workflow, using the logistic regression model
 #' \dontrun{
 #'
-#' snowmen <- photosSearch(year_range = c(2005, 2016),
+#' snowmen <- photosSearch(year_range = c(2015, 2016),
 #'                         text = 'snowman',
 #'                         woe_id = 12578048)
-#' downloadImages(images, licenses = c(4, 7:10))
+#' downloadImages(snowmen,
+#'                licenses = c(6:10),
+#'                saveDir = tempdir(),
+#'                max_quality = 2)
 #' 
 #' }
 
@@ -25,7 +29,13 @@ downloadImages <-
   function(photoSearch_results,
            licenses = 7:10,          
            saveDir = '.',
-           max_quality = 2){
+           max_quality = 2,
+           verbose = TRUE){
+    
+    if(!dir.exists(saveDir)){
+      message(paste('saveDir', saveDir, 'does not exist, I will create it for you'))
+      dir.create(saveDir, recursive = TRUE)
+    }
     
     # get those that forefill the license requirements
     toGet <- photoSearch_results[photoSearch_results$license %in% licenses, ]
@@ -43,14 +53,14 @@ downloadImages <-
     
     downloadURLs <- apply(toGet[, quality, drop = FALSE], MARGIN = 1, FUN = biggest_url)
     
-    dump <- sapply(downloadURLs, FUN = function(x){
+    dump <- sapply(downloadURLs, all = downloadURLs, verbose = verbose,
+                   FUN = function(x, all, verbose){
+      if(verbose) cat(paste0('File ',grep(x,all),' of ',length(all),'\n'))
       download.file(url = x,
                     destfile = file.path(saveDir, basename(x)),
                     mode = 'wb')
       })
     
-    # stop('THIS FUNCTION DOESNT WORK YET')
-    
-    return(NULL)
+    return(downloadURLs)
     
   }
