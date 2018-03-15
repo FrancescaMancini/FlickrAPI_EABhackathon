@@ -27,7 +27,13 @@ This function uses the Flickr API to get metadata about the images
 # run a workflow, using the logistic regression model
 \dontrun{
 
-birds <- photosSearch(c(2005,2006), "bird", "12578048", TRUE)
+# Authenticate the first time you run a search
+#auth.flickr()
+
+birds <- photosSearch(year_range = c(2005,2006),
+                      text = "mute+swan",
+                      woe_id =  12578048,
+                      has_geo = TRUE)
 
 head(birds)
 

@@ -4,14 +4,22 @@
 \alias{downloadImages}
 \title{Download images found using \code{photosSearch}}
 \usage{
-downloadImages(photoSearch_results, licenses = 7:10, saveDir = ".")
+downloadImages(photoSearch_results, licenses = 7:10, saveDir = ".",
+  max_quality = 2, verbose = TRUE)
 }
 \arguments{
 \item{photoSearch_results}{A data.frame output from \code{photoSearch}.}
 
-\item{licenses}{Numeric vector, set the licenses you want to download images for}
+\item{licenses}{Numeric vector, set the licenses you want to download images for. See \code{getLicenses}}
 
 \item{saveDir}{Character, the path where images should be saved}
+
+\item{max_quality}{Numeric 1-4 giving the maximum quality of image you want to download 1=small, 4=large}
+
+\item{verbose}{logical, if TRUE the progeress through images is given}
+}
+\value{
+A vector of all the URLs that where targetted for download
 }
 \description{
 Using the data returned from the
@@ -20,10 +28,13 @@ Using the data returned from the
 # run a workflow, using the logistic regression model
 \dontrun{
 
-snowmen <- photosSearch(year_range = c(2005, 2016),
+snowmen <- photosSearch(year_range = c(2015, 2016),
                         text = 'snowman',
                         woe_id = 12578048)
-downloadImages(images, licenses = c(4, 7:10))
+downloadImages(snowmen,
+               licenses = c(6:10),
+               saveDir = tempdir(),
+               max_quality = 2)
 
 }
 }
