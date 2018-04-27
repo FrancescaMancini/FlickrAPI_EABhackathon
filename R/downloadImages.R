@@ -45,13 +45,21 @@ downloadImages <-
     # Download the images
     biggest_url <- function(x){
       
-      tail(x = na.omit(x), 1)
+      bu <- tail(x = na.omit(x), 1)
+      cat(bu)
+      if(length(bu) == 0){
+        return(NA)
+      } else {
+        return(bu)
+      }
       
     }
     
     quality <- c('url_s', 'url_m', 'url_l', 'url_o')[1:max_quality]
     
     downloadURLs <- apply(toGet[, quality, drop = FALSE], MARGIN = 1, FUN = biggest_url)
+    
+    downloadURLs[is.na(downloadURLs)] <- toGet[is.na(downloadURLs), 'url_o'] 
     
     dump <- sapply(downloadURLs, all = downloadURLs, verbose = verbose,
                    FUN = function(x, all, verbose){
