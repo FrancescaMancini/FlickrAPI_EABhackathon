@@ -194,36 +194,34 @@ function(year_range,
            })
            
            if(error != 'error'){
-           
-             id <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "id")                 #extract photo id
-             owner <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "owner")           #extract user id
-             datetaken <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "datetaken")   #extract date picture was taken
-             tags <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "tags")             #extract tags
-             latitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "latitude")     #extract latitude
-             longitude <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "longitude")   #extract longitude
-             license <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "license")       #extract license
-             url_s <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_s")           #extract url_s
-             url_m <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_m")           #extract url_m
-             url_l <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_l")           #extract url_l
-             url_o <- xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_o")           #extract url_o
-             
-             url_s[sapply(url_s, is.null)] <- NA
-             url_m[sapply(url_m, is.null)] <- NA
-             url_l[sapply(url_l, is.null)] <- NA
-             url_o[sapply(url_o, is.null)] <- NA
-             
-             tmp_df <- data.frame(id, owner, datetaken, tags,
-                                  as.numeric(latitude),
-                                  as.numeric(longitude), license,
-                                  url_s = unlist(url_s), url_m = unlist(url_m),
-                                  url_l = unlist(url_l), url_o = unlist(url_o),
-                                  stringsAsFactors = FALSE)
-             
-             tmp_df$page <- i
-             pics_tmp <- rbind(pics_tmp, tmp_df)
-           
+             getPhotos_data <<- getPhotos_data
+             id <- listNulltoNA(xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "id"))                 #extract photo id
+             owner <- listNulltoNA(xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "owner"))           #extract user id
+             datetaken <- listNulltoNA(xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "datetaken"))   #extract date picture was taken
+             tags <- listNulltoNA(xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "tags"))             #extract tags
+             latitude <- listNulltoNA(xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "latitude"))     #extract latitude
+             longitude <- listNulltoNA(xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "longitude"))   #extract longitude
+             license <- listNulltoNA(xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "license"))       #extract license
+             url_s <- listNulltoNA(xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_s"))           #extract url_s
+             url_m <- listNulltoNA(xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_m"))           #extract url_m
+             url_l <- listNulltoNA(xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_l"))           #extract url_l
+             url_o <- listNulltoNA(xpathSApply(getPhotos_data, "//photo", xmlGetAttr, "url_o"))           #extract url_o
+
+             if(!all(is.na(c(id,owner,datetaken,tags,latitude,longitude,license,url_s,url_m,url_l,url_o)))){
+               
+               tmp_df <- data.frame(id, owner, datetaken, tags,
+                                    as.numeric(latitude),
+                                    as.numeric(longitude), license,
+                                    url_s = unlist(url_s), url_m = unlist(url_m),
+                                    url_l = unlist(url_l), url_o = unlist(url_o),
+                                    stringsAsFactors = FALSE)
+               
+               tmp_df$page <- i
+               pics_tmp <- rbind(pics_tmp, tmp_df)
+               rm(list = 'tmp_df')
+               
+             }
            }
-           
          }
          
          pics <- rbind(pics, pics_tmp)
