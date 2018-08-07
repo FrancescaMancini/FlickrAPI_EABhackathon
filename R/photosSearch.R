@@ -36,7 +36,8 @@ function(year_range,
          text,          
          bbox = NULL,
          woe_id =NULL,        
-         has_geo = TRUE){
+         has_geo = TRUE,
+         accuracy = NULL){
 
   if( !(is.null(bbox) | is.null(woe_id))==TRUE) {
     stop('can not provide bbox and woe_id')
@@ -78,6 +79,7 @@ function(year_range,
                         "&extras=", extras,
                         "&per_page=", perpage,
                         "&format=", format,
+                        "&accuracy=", accuracy
                         sep = "")
      } else if(!is.null(woe_id)){
        getPhotos <- paste(baseURL,
@@ -88,6 +90,7 @@ function(year_range,
                           "&extras=", extras,
                           "&per_page=", perpage,
                           "&format=", format,
+                          "&accuracy=", accuracy
                           sep = "")     
      } else {
        getPhotos <- paste(baseURL,
@@ -98,6 +101,7 @@ function(year_range,
                           "&extras=", extras,
                           "&per_page=", perpage,
                           "&format=", format,
+                          "&accuracy=", accuracy
                           sep = "")
       }
 
